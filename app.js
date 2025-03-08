@@ -1,16 +1,12 @@
 import express from 'express';
-import dotenv from 'dotenv';
-import { connectDB } from './db/config.js';
-import contactsRouter from './routes/contactsRouter.js';
-
-dotenv.config();
+import authRoutes from './routes/auth.js';
+import contactRoutes from './routes/contactsRouter.js';
+import authMiddleware from './middlewares/authMiddleware.js';
 
 const app = express();
 app.use(express.json());
-app.use('/api/contacts', contactsRouter);
 
-connectDB().then(() => {
-  app.listen(process.env.PORT || 3000, () => {
-    console.log(`Server running on port ${process.env.PORT || 3000}`);
-  });
-});
+app.use('/api/auth', authRoutes);
+app.use('/api/contacts', authMiddleware, contactRoutes);
+
+export default app;
