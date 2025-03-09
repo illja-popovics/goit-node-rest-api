@@ -21,8 +21,12 @@ const Contact = sequelize.define('Contact', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  owner: {
+  type: DataTypes.INTEGER,
+  allowNull: false,
+},
 }, {
-  tableName: 'contacts', // ✅ Explicitly define the correct table name
+  tableName: 'contacts', 
   timestamps: false,
 });
 

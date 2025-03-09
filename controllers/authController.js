@@ -71,15 +71,29 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
+    console.log("Login request received:", req.body);
+
     const { email, password } = req.body;
-    const user = await User.findOne({ where: { email } });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: 'Email or password is wrong' });
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      console.log("User not found for email:", email);
+      return res.status(401).json({ message: "Email or password is wrong" });
+    }
+
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      console.log("Password does not match");
+      return res.status(401).json({ message: "Email or password is wrong" });
+    }
+
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
     await user.update({ token });
-    
+
     res.json({
       token,
       user: {
@@ -89,9 +103,11 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(400).json({ message: 'Validation error' });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
+
 
 const logout = async (req, res) => {
   try {
