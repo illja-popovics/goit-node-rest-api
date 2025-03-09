@@ -14,18 +14,18 @@ const sequelize = new Sequelize(process.env.DB_URI, {
   logging: false,
 });
 
-await sequelize.sync({ alter: true });
-
-
 export const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log('Database connection successful');
+    console.log('✅ Database connection successful');
+
+    // Sync database (Create tables if they don't exist)
+    await sequelize.sync({ alter: true });
+    console.log('✅ Database synced successfully');
   } catch (error) {
-    console.error('Database connection error:', error);
+    console.error('❌ Database connection error:', error);
     process.exit(1);
   }
 };
 
 export default sequelize;
-

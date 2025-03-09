@@ -25,10 +25,21 @@ const register = async (req, res) => {
   try {
     const { email, password } = req.body;
     
+    // Validate required fields
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(409).json({ message: 'Email in use' });
+      return res.status(409).json({ message: 'Email already in use' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Invalid email format' });
     }
 
     // Generate Gravatar URL
@@ -37,11 +48,12 @@ const register = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    // Create user with avatarURL
+    // Create user with default subscription
     const newUser = await User.create({ 
       email, 
       password: hashedPassword,
       avatarURL, // Store avatar URL
+      subscription: 'starter',
     });
     
     res.status(201).json({
@@ -52,7 +64,8 @@ const register = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(400).json({ message: 'Validation error' });
+    console.error('Registration error:', error);
+    res.status(400).json({ message: error.message || 'Validation error' });
   }
 };
 
@@ -112,7 +125,7 @@ const updateAvatar = async (req, res, next) => {
     }
 
     const { id } = req.user;
-    const newFileName = `${id}-${req.file.filename}`;
+    const newFileName = `${id}-${Date.now()}${path.extname(req.file.originalname)}`;
     const newFilePath = path.join(avatarsDir, newFileName);
 
     await fs.rename(req.file.path, newFilePath);
