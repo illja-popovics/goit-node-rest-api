@@ -22,6 +22,10 @@ const User = sequelize.define('User', {
   token: {
     type: DataTypes.STRING,
     defaultValue: null,
+    },
+  avatarURL: {
+    type: DataTypes.STRING,  // Store avatar URL
+    allowNull: true,
   },
 });
 

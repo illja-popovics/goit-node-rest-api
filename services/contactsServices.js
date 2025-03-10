@@ -8,9 +8,13 @@ export const getContactById = async (id) => {
   return await Contact.findByPk(id);
 };
 
-export const addContact = async (data) => {
-  return await Contact.create(data);
+export const addContact = async (data, userId) => {
+    if (!userId) {
+        throw new Error("User ID is required for adding a contact");
+    }
+    return await Contact.create({ ...data, owner: userId });
 };
+
 
 export const updateContact = async (id, data) => {
   const contact = await Contact.findByPk(id);
