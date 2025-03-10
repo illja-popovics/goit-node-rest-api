@@ -1,8 +1,13 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../db/config.js';
-import User from './user.js';
 
 const Contact = sequelize.define('Contact', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+    allowNull: false,
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -10,22 +15,19 @@ const Contact = sequelize.define('Contact', {
   email: {
     type: DataTypes.STRING,
     allowNull: false,
-    validate: {
-      isEmail: true,
-    },
+    unique: true,
   },
   phone: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   owner: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: User,
-      key: 'id',
-    },
-  },
+  type: DataTypes.INTEGER,
+  allowNull: false,
+},
+}, {
+  tableName: 'contacts', 
+  timestamps: false,
 });
 
 export default Contact;

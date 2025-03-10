@@ -8,42 +8,74 @@ import {
   updateStatusContact,
 } from '../services/contactsServices.js';
 
+import authMiddleware from '../middlewares/authMiddleware.js';
+
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-  const contacts = await getAllContacts();
-  res.json(contacts);
+// GET all contacts for authenticated user
+router.get('/', authMiddleware, async (req, res, next) => {
+  try {
+    const contacts = await getAllContacts(req.user.id);
+    res.json(contacts);
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.get('/:contactId', async (req, res) => {
-  const contact = await getContactById(req.params.contactId);
-  if (!contact) return res.status(404).json({ message: 'Not found' });
-  res.json(contact);
+// GET a specific contact (only if owned by user)
+router.get('/:contactId', authMiddleware, async (req, res, next) => {
+  try {
+    const contact = await getContactById(req.params.contactId, req.user.id);
+    if (!contact) return res.status(404).json({ message: 'Not found' });
+    res.json(contact);
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.post('/', async (req, res) => {
-  const newContact = await addContact(req.body);
-  res.status(201).json(newContact);
+// POST a new contact (assigning it to authenticated user)
+router.post('/', authMiddleware, async (req, res, next) => {
+  try {
+    const newContact = await addContact(req.body, req.user.id);
+    res.status(201).json(newContact);
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.put('/:contactId', async (req, res) => {
-  const updatedContact = await updateContact(req.params.contactId, req.body);
-  if (!updatedContact) return res.status(404).json({ message: 'Not found' });
-  res.json(updatedContact);
+// PUT update contact (only if owned by user)
+router.put('/:contactId', authMiddleware, async (req, res, next) => {
+  try {
+    const updatedContact = await updateContact(req.params.contactId, req.body, req.user.id);
+    if (!updatedContact) return res.status(404).json({ message: 'Not found' });
+    res.json(updatedContact);
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.delete('/:contactId', async (req, res) => {
-  const deletedContact = await deleteContact(req.params.contactId);
-  if (!deletedContact) return res.status(404).json({ message: 'Not found' });
-  res.json(deletedContact);
+// DELETE a contact (only if owned by user)
+router.delete('/:contactId', authMiddleware, async (req, res, next) => {
+  try {
+    const deletedContact = await deleteContact(req.params.contactId, req.user.id);
+    if (!deletedContact) return res.status(404).json({ message: 'Not found' });
+    res.json({ message: 'Contact deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.patch('/:contactId/favorite', async (req, res) => {
-  const { favorite } = req.body;
-  if (typeof favorite !== 'boolean') return res.status(400).json({ message: 'Invalid input' });
-  const updatedContact = await updateStatusContact(req.params.contactId, favorite);
-  if (!updatedContact) return res.status(404).json({ message: 'Not found' });
-  res.json(updatedContact);
+// PATCH update contact favorite status (only if owned by user)
+router.patch('/:contactId/favorite', authMiddleware, async (req, res, next) => {
+  try {
+    const { favorite } = req.body;
+    if (typeof favorite !== 'boolean') return res.status(400).json({ message: 'Invalid input' });
+    const updatedContact = await updateStatusContact(req.params.contactId, favorite, req.user.id);
+    if (!updatedContact) return res.status(404).json({ message: 'Not found' });
+    res.json(updatedContact);
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default router;
