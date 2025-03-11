@@ -5,7 +5,8 @@ import {
   getOneContact,
   createContact,
   updateContact,
-  deleteContact
+  deleteContact,
+  updateFavoriteStatus
 } from '../controllers/contactsControllers.js';
 
 const router = express.Router();
@@ -14,15 +15,18 @@ const router = express.Router();
 router.get('/', authMiddleware, getAllContactsForUser);
 
 // GET a specific contact (only if owned by user)
-router.get('/:contactId', authMiddleware, getOneContact);
+router.get('/:id', authMiddleware, getOneContact);
 
 // POST a new contact (assigning it to authenticated user)
 router.post('/', authMiddleware, createContact);
 
 // PUT update contact (only if owned by user)
-router.put('/:contactId', authMiddleware, updateContact);
+router.put('/:id', authMiddleware, updateContact);
 
 // DELETE a contact (only if owned by user)
-router.delete('/:contactId', authMiddleware, deleteContact);
+router.delete('/:id', authMiddleware, deleteContact);
+
+// PATCH update favorite status
+router.patch('/:id/favorite', authMiddleware, updateFavoriteStatus);
 
 export default router;

@@ -21,12 +21,16 @@ const Contact = sequelize.define('Contact', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  favorite: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,  
+  },
   owner: {
-  type: DataTypes.INTEGER,
-  allowNull: false,
-},
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
 }, {
-  tableName: 'contacts', 
+  tableName: 'contacts',
   timestamps: false,
 });
 

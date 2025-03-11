@@ -7,15 +7,13 @@ export const getAllContacts = async (userId) => {
 
 // Get a single contact by ID (only if owned by user)
 export const getContactById = async (id, userId) => {
-  return await Contact.findOne({ where: { id, owner: userId } });
+  const contact = await Contact.findOne({ where: { id, owner: userId } });
+  return contact || null;  // ✅ Fix to avoid throwing an error directly
 };
 
 // Add a new contact for a specific user
 export const addContact = async (data, userId) => {
-  if (!userId) {
-    throw new Error("User ID is required for adding a contact");
-  }
-  return await Contact.create({ ...data, owner: userId });
+  return await Contact.create({ ...data, owner: userId, favorite: data.favorite ?? false });
 };
 
 // Update a contact (only if owned by user)
@@ -37,7 +35,6 @@ export const deleteContact = async (id, userId) => {
 export const updateStatusContact = async (id, favorite, userId) => {
   const contact = await Contact.findOne({ where: { id, owner: userId } });
   if (!contact) return null;
-  contact.favorite = favorite;
-  await contact.save();
+  await contact.update({ favorite });
   return contact;
 };
