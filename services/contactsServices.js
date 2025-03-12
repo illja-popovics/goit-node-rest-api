@@ -1,38 +1,40 @@
-import Contact from '../models/contact.js'; // Import Contact model
+import Contact from '../models/contact.js';
 
-export const getAllContacts = async () => {
-  return await Contact.findAll();
+// Get all contacts for a specific user
+export const getAllContacts = async (userId) => {
+  return await Contact.findAll({ where: { owner: userId } });
 };
 
-export const getContactById = async (id) => {
-  return await Contact.findByPk(id);
+// Get a single contact by ID (only if owned by user)
+export const getContactById = async (id, userId) => {
+  const contact = await Contact.findOne({ where: { id, owner: userId } });
+  return contact || null;  // ✅ Fix to avoid throwing an error directly
 };
 
+// Add a new contact for a specific user
 export const addContact = async (data, userId) => {
-    if (!userId) {
-        throw new Error("User ID is required for adding a contact");
-    }
-    return await Contact.create({ ...data, owner: userId });
+  return await Contact.create({ ...data, owner: userId, favorite: data.favorite ?? false });
 };
 
-
-export const updateContact = async (id, data) => {
-  const contact = await Contact.findByPk(id);
+// Update a contact (only if owned by user)
+export const updateContact = async (id, data, userId) => {
+  const contact = await Contact.findOne({ where: { id, owner: userId } });
   if (!contact) return null;
   return await contact.update(data);
 };
 
-export const deleteContact = async (id) => {
-  const contact = await Contact.findByPk(id);
+// Delete a contact (only if owned by user)
+export const deleteContact = async (id, userId) => {
+  const contact = await Contact.findOne({ where: { id, owner: userId } });
   if (!contact) return null;
   await contact.destroy();
   return contact;
 };
 
-export const updateStatusContact = async (id, favorite) => {
-  const contact = await Contact.findByPk(id);
+// Update the "favorite" status of a contact (only if owned by user)
+export const updateStatusContact = async (id, favorite, userId) => {
+  const contact = await Contact.findOne({ where: { id, owner: userId } });
   if (!contact) return null;
-  contact.favorite = favorite;
-  await contact.save();
+  await contact.update({ favorite });
   return contact;
 };
