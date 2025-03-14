@@ -26,6 +26,13 @@ const User = sequelize.define('User', {
   avatarURL: {
     type: DataTypes.STRING,  // Store avatar URL
     allowNull: true,
+    },
+  verify: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false, // Нове поле для верифікації
+  },
+  verificationToken: {
+    type: DataTypes.STRING, // Токен для верифікації
   },
 });
 
