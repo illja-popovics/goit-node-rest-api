@@ -144,13 +144,21 @@ const updateAvatar = async (req, res, next) => {
     const newFileName = `${id}-${Date.now()}${path.extname(req.file.originalname)}`;
     const newFilePath = path.join(avatarsDir, newFileName);
 
-    await fs.rename(req.file.path, newFilePath);
+    try {
+      await fs.rename(req.file.path, newFilePath);
+    } catch (error) {
+      console.error("Error moving file:", error);
+      // Видалення файлу з temp у разі помилки переміщення
+      await fs.unlink(req.file.path);
+      return res.status(500).json({ message: 'Error processing avatar upload' });
+    }
 
     const avatarURL = `/avatars/${newFileName}`;
     await User.update({ avatarURL }, { where: { id } });
 
     res.status(200).json({ avatarURL });
   } catch (error) {
+    console.error("Avatar update error:", error);
     res.status(500).json({ message: 'Server error' });
   }
 };
